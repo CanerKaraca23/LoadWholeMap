@@ -52,11 +52,23 @@ jobs:
         shell: cmd
         run: mklink /J "%GITHUB_WORKSPACE%\PC\injector" "%GITHUB_WORKSPACE%\plugin-sdk\injector"
 
+      - name: Create C++ standard override
+        shell: cmd
+        run: |
+          echo ^<?xml version="1.0" encoding="utf-8"?^> > "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo ^<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo   ^<ItemDefinitionGroup^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo     ^<ClCompile^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo       ^<LanguageStandard^>stdcpplatest^</LanguageStandard^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo     ^</ClCompile^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo   ^</ItemDefinitionGroup^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo ^</Project^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+
       - name: Build
         shell: cmd
         run: |
           set PLUGIN_SDK_DIR=%GITHUB_WORKSPACE%\plugin-sdk
-          msbuild PC\LoadWholeMap\LoadWholeMap.vcxproj /p:Configuration="${{ matrix.configuration }}" /p:Platform=Win32 /p:PlatformToolset=v143 /p:LanguageStandard=stdcpplatest /p:OutDir="%GITHUB_WORKSPACE%\build/"
+          msbuild PC\LoadWholeMap\LoadWholeMap.vcxproj /p:Configuration="${{ matrix.configuration }}" /p:Platform=Win32 /p:PlatformToolset=v143 /p:ForceImportAfterCppTargets="%GITHUB_WORKSPACE%\ci-overrides.props" /p:OutDir="%GITHUB_WORKSPACE%\build/"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
