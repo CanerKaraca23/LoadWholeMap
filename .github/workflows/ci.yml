@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: ["GTASA Release", "GTAVC Release", "GTA3 Release"]
+        platform: [Win32]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build
+        run: msbuild LoadWholeMap.sln /p:Configuration="${{ matrix.configuration }}" /p:Platform=${{ matrix.platform }} /p:OutDir="${{ github.workspace }}/build/"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: LoadWholeMap-${{ matrix.configuration }}-${{ matrix.platform }}
+          path: ${{ github.workspace }}/build/
