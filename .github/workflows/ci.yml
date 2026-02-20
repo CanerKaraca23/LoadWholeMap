@@ -14,15 +14,10 @@ jobs:
     runs-on: windows-latest
 
     strategy:
-      fail-fast: false
       matrix:
         include:
           - configuration: "GTASA Release"
             sdk_target: Plugin_SA
-          - configuration: "GTAVC Release"
-            sdk_target: Plugin_VC
-          - configuration: "GTA3 Release"
-            sdk_target: Plugin_III
 
     steps:
       - name: Checkout repository
@@ -58,7 +53,7 @@ jobs:
           echo     ^<ClCompile^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo       ^<LanguageStandard^>stdcpplatest^</LanguageStandard^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo       ^<PreprocessorDefinitions^>RW;%%(PreprocessorDefinitions)^</PreprocessorDefinitions^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
-          echo       ^<AdditionalIncludeDirectories^>$(PLUGIN_SDK_DIR)\plugin_sa\game_sa\rw;$(PLUGIN_SDK_DIR)\plugin_vc\game_vc\rw;$(PLUGIN_SDK_DIR)\plugin_iii\game_iii\rw;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo       ^<AdditionalIncludeDirectories^>$(PLUGIN_SDK_DIR)\plugin_sa\game_sa\rw;%%(AdditionalIncludeDirectories)^</AdditionalIncludeDirectories^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo     ^</ClCompile^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo   ^</ItemDefinitionGroup^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo ^</Project^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
