@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         configuration: ["GTASA Release", "GTAVC Release", "GTA3 Release"]
-        platform: [Win32]
+        platform: [x86]
 
     steps:
       - name: Checkout repository
