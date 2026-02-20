@@ -15,21 +15,51 @@ jobs:
 
     strategy:
       matrix:
-        configuration: ["GTASA Release", "GTAVC Release", "GTA3 Release"]
-        platform: [x86]
+        include:
+          - configuration: "GTASA Release"
+            sdk_target: Plugin_SA
+          - configuration: "GTAVC Release"
+            sdk_target: Plugin_VC
+          - configuration: "GTA3 Release"
+            sdk_target: Plugin_III
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Checkout plugin-sdk
+        uses: actions/checkout@v4
+        with:
+          repository: DK22Pac/plugin-sdk
+          path: plugin-sdk
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Generate plugin-sdk projects
+        shell: cmd
+        run: |
+          set PLUGIN_SDK_DIR=%GITHUB_WORKSPACE%\plugin-sdk
+          "%PLUGIN_SDK_DIR%\tools\premake\premake5" vs2022 --file="%PLUGIN_SDK_DIR%\tools\premake\premake5.lua"
+
+      - name: Build plugin-sdk
+        shell: cmd
+        run: |
+          set PLUGIN_SDK_DIR=%GITHUB_WORKSPACE%\plugin-sdk
+          msbuild "%PLUGIN_SDK_DIR%\plugin.sln" /p:Configuration=Release /p:Platform="Mixed Platforms" /t:${{ matrix.sdk_target }} /m
+
+      - name: Setup injector include path
+        shell: cmd
+        run: mklink /J "%GITHUB_WORKSPACE%\PC\injector" "%GITHUB_WORKSPACE%\plugin-sdk\injector"
+
       - name: Build
-        run: msbuild LoadWholeMap.sln /p:Configuration="${{ matrix.configuration }}" /p:Platform=${{ matrix.platform }} /p:OutDir="${{ github.workspace }}/build/"
+        shell: cmd
+        run: |
+          set PLUGIN_SDK_DIR=%GITHUB_WORKSPACE%\plugin-sdk
+          msbuild PC\LoadWholeMap\LoadWholeMap.vcxproj /p:Configuration="${{ matrix.configuration }}" /p:Platform=Win32 /p:PlatformToolset=v143 /p:OutDir="%GITHUB_WORKSPACE%\build\"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: LoadWholeMap-${{ matrix.configuration }}-${{ matrix.platform }}
+          name: LoadWholeMap-${{ matrix.configuration }}
           path: ${{ github.workspace }}/build/
