@@ -49,10 +49,6 @@ jobs:
           set PLUGIN_SDK_DIR=%GITHUB_WORKSPACE%\plugin-sdk
           msbuild "%PLUGIN_SDK_DIR%\plugin.sln" /p:Configuration=Release /p:Platform="Mixed Platforms" /t:${{ matrix.sdk_target }} /m
 
-      - name: Setup injector include path
-        shell: cmd
-        run: mklink /J "%GITHUB_WORKSPACE%\PC\injector" "%GITHUB_WORKSPACE%\plugin-sdk\injector"
-
       - name: Create build overrides
         shell: cmd
         run: |
