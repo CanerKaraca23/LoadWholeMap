@@ -14,6 +14,7 @@ jobs:
     runs-on: windows-latest
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - configuration: "GTASA Release"
@@ -52,7 +53,7 @@ jobs:
         shell: cmd
         run: mklink /J "%GITHUB_WORKSPACE%\PC\injector" "%GITHUB_WORKSPACE%\plugin-sdk\injector"
 
-      - name: Create C++ standard override
+      - name: Create build overrides
         shell: cmd
         run: |
           echo ^<?xml version="1.0" encoding="utf-8"?^> > "%GITHUB_WORKSPACE%\ci-overrides.props"
@@ -60,6 +61,7 @@ jobs:
           echo   ^<ItemDefinitionGroup^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo     ^<ClCompile^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo       ^<LanguageStandard^>stdcpplatest^</LanguageStandard^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
+          echo       ^<PreprocessorDefinitions^>RW;%%(PreprocessorDefinitions)^</PreprocessorDefinitions^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo     ^</ClCompile^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo   ^</ItemDefinitionGroup^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
           echo ^</Project^> >> "%GITHUB_WORKSPACE%\ci-overrides.props"
